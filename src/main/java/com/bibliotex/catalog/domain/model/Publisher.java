@@ -20,11 +20,5 @@ public class Publisher extends BaseEntity {
     private String country;
 
     @OneToMany(mappedBy = "publisher")
-    private List<Book> books = new ArrayList<>();
-
-    @OneToMany(mappedBy = "publisher")
-    private List<Comic> comics = new ArrayList<>();
-
-    @OneToMany(mappedBy = "publisher")
-    private List<Manga> mangas = new ArrayList<>();
+    private List<Catalog> catalogs = new ArrayList<>();
 }
