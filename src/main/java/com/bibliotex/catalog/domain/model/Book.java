@@ -16,9 +16,9 @@ import java.util.List;
 public class Book extends Catalog{
     private String isbn;
 
-    public Book(String title, String description, Integer pages, String languague,
+    public Book(String title, String description, Integer pages, String language,
                 Integer edtiion, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher, String isbn) {
-        super(title, description, pages, languague, edtiion, yearOfRelease, imageUrl, authors, publisher);
+        super(title, description, pages, language, edtiion, yearOfRelease, imageUrl, authors, publisher);
         this.isbn = isbn;
     }
 }

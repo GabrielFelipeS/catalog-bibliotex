@@ -27,9 +27,9 @@ public class Comic extends Catalog{
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
 
-    public Comic(String title, String description,Integer pages, String languague,
+    public Comic(String title, String description,Integer pages, String language,
                 Integer edtiion, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher, String universe) {
-        super(title, description, pages, languague, edtiion, yearOfRelease, imageUrl, authors, publisher);
+        super(title, description, pages, language, edtiion, yearOfRelease, imageUrl, authors, publisher);
         this.universe = universe;
     }
 }

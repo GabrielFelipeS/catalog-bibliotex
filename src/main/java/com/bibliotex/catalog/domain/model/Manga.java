@@ -28,9 +28,9 @@ public class Manga extends Catalog{
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
 
-    public Manga(String title, String description, Integer pages, String languague,
+    public Manga(String title, String description, Integer pages, String language,
                 Integer edtiion, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher, Boolean isOngoing, String magazine) {
-        super(title, description, pages, languague, edtiion, yearOfRelease, imageUrl, authors, publisher);
+        super(title, description, pages, language, edtiion, yearOfRelease, imageUrl, authors, publisher);
         this.isOngoing = isOngoing;
         this.magazine = magazine;
     }
