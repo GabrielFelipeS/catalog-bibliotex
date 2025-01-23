@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
-
 
 @Entity
 @Getter
@@ -18,23 +16,9 @@ import java.util.List;
 public class Book extends Catalog{
     private String isbn;
 
-    @ManyToMany
-    @JoinTable(
-            name = "author_book",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "author_id")
-    )
-    private List<Author> authors = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "publisher_id")
-    private Publisher publisher;
-
-    public Book(String title, Integer pages, String languague,
-                Integer edtiion, Integer yearOfRelease, List<Author> authors, Publisher publisher, String isbn) {
-        super(title, pages, languague, edtiion, yearOfRelease);
-        this.authors = authors;
-        this.publisher = publisher;
+    public Book(String title, String description, Integer pages, String languague,
+                Integer edtiion, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher, String isbn) {
+        super(title, description, pages, languague, edtiion, yearOfRelease, imageUrl, authors, publisher);
         this.isbn = isbn;
     }
 }

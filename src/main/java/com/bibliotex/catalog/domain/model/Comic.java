@@ -1,7 +1,6 @@
 package com.bibliotex.catalog.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,11 +27,9 @@ public class Comic extends Catalog{
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
 
-    public Comic(String title, Integer pages, String languague,
-                Integer edtiion, Integer yearOfRelease, List<Author> authors, Publisher publisher, String universe) {
-        super(title, pages, languague, edtiion, yearOfRelease);
-        this.authors = authors;
-        this.publisher = publisher;
+    public Comic(String title, String description,Integer pages, String languague,
+                Integer edtiion, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher, String universe) {
+        super(title, description, pages, languague, edtiion, yearOfRelease, imageUrl, authors, publisher);
         this.universe = universe;
     }
 }
