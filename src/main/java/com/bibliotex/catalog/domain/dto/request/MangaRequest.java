@@ -16,5 +16,6 @@ public record MangaRequest (
     List<Author> authors,
     Publisher publisher,
     Boolean isOngoing,
-    String magazine
+    String magazine,
+    String imageUrl
 ) { }
