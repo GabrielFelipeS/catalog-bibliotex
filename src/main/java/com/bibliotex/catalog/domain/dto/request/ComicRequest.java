@@ -15,5 +15,6 @@ public record ComicRequest (
     Integer yearOfRelease,
     List<Author> authors,
     Publisher publisher,
-    String universe
+    String universe,
+    String imageUrl
 ) { }
