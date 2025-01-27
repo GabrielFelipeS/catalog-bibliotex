@@ -1,6 +1,7 @@
 package com.bibliotex.catalog.domain.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Book extends Catalog{
+    @Column(nullable = false, unique = true)
     private String isbn;
 
     public Book(String title, String description, Integer pages, String language,
-                Integer edtiion, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher, String isbn) {
-        super(title, description, pages, language, edtiion, yearOfRelease, imageUrl, authors, publisher);
+                Integer edition, Integer yearOfRelease, String imageUrl, String isbn, List<Author> authors, Publisher publisher) {
+        super(title, description, pages, language, edition, yearOfRelease, imageUrl, authors, publisher);
         this.isbn = isbn;
     }
 }
