@@ -22,9 +22,9 @@ public class BookService {
     private final ImageValidationService imageValidationService;
 
     public BookResponse createBook(BookRequest bookRequest) {
-        boolean isNotValidUrlImg = imageValidationService.isInvalid(bookRequest.imageUrl());
+        boolean isInvalidUrlImage = imageValidationService.isInvalid(bookRequest.imageUrl());
 
-        if (isNotValidUrlImg) throw new IllegalStateException("A imagem fornecida não existe");
+        if (isInvalidUrlImage) throw new IllegalStateException("A imagem fornecida não existe");
 
         boolean isbnAlreadyExists = bookRepository.existsBookByIsbn(bookRequest.isbn());
 

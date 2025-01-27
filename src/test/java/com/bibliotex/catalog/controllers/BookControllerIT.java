@@ -281,7 +281,7 @@ class BookControllerIT {
     })
     @DirtiesContext
     @DisplayName("Should be able validating url image")
-    public void shouldBeableValidatingUrlImage(String url, boolean isSuccess) {
+    public void shouldBeAbleValidatingUrlImage(String url, boolean isSuccess) {
         BookRequest bookRequest = getBookRequest(url);
 
         ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
