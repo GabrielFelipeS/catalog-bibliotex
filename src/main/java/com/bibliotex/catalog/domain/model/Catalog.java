@@ -1,7 +1,7 @@
 package com.bibliotex.catalog.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,17 +16,30 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Catalog extends BaseEntity {
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
     private Integer pages;
+
+    @Column(nullable = false)
     private String language;
+
+    @Column(nullable = false)
     private Integer edition;
+
+    @Column(nullable = false)
     private Integer yearOfRelease;
+
+    @Column(nullable = false)
     private String imageUrl;
 
     @ManyToMany
     @JoinTable(
-            name = "author_book",
+            name = "catalog_authors",
             joinColumns = @JoinColumn(name = "catalog_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id")
     )
@@ -46,5 +59,15 @@ public abstract class Catalog extends BaseEntity {
         this.imageUrl = imageUrl;
         this.authors = authors;
         this.publisher = publisher;
+    }
+
+    @JsonIgnore
+    public List<Long> getAuthorsId() {
+        return authors.stream().map(Author::getId).toList();
+    }
+
+    @JsonIgnore
+    public Long getPublisherId() {
+        return publisher.getId();
     }
 }
