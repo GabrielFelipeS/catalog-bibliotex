@@ -1,6 +1,8 @@
 package com.bibliotex.catalog.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +21,7 @@ public class Publisher extends BaseEntity {
     private String name;
     private String country;
 
-    @OneToMany(mappedBy = "publisher")
+    @JsonIgnore
+    @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
     private List<Catalog> catalogs = new ArrayList<>();
 }
