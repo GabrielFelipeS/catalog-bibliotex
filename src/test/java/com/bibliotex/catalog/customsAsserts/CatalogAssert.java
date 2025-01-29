@@ -2,6 +2,7 @@ package com.bibliotex.catalog.customsAsserts;
 
 
 import com.bibliotex.catalog.domain.dto.request.BookRequest;
+import com.bibliotex.catalog.domain.dto.request.MangaRequest;
 import com.bibliotex.catalog.domain.model.Catalog;
 import org.assertj.core.api.AbstractAssert;
 
@@ -23,6 +24,16 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
         this.isValid(bookRequest.title(), bookRequest.description(), bookRequest.pages(),
                 bookRequest.language(), bookRequest.edition(), bookRequest.yearOfRelease(),
                 bookRequest.imageUrl(), bookRequest.authorsIds(), bookRequest.publisherId());
+
+        return this;
+    }
+
+    public CatalogAssert isValid(MangaRequest mangaRequest) {
+        isNotNull();
+
+        this.isValid(mangaRequest.title(), mangaRequest.description(), mangaRequest.pages(),
+                mangaRequest.language(), mangaRequest.edition(), mangaRequest.yearOfRelease(),
+                mangaRequest.imageUrl(), mangaRequest.authorsIds(), mangaRequest.publisherId());
 
         return this;
     }
