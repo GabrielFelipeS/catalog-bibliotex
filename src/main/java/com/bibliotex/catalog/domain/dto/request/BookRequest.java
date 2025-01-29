@@ -35,10 +35,11 @@ public record BookRequest (
         @Positive(message = "A quantidade de páginas deve ser maior que zero")
         Long publisherId,
 
-        @NotBlank(message = "O ISBN não deveria ser nulo ou vazio")
-        String isbn,
-
         @NotBlank(message = "A imageUrl não deveria ser nulo ou vazio")
         @Pattern(regexp = "^http(|s)://books\\.google\\.com/books/content\\?id=[a-zA-Z0-9_-]+(&.*)?$", message = "O endereço da imagem não é valido, por favor insira outro")
-        String imageUrl
+        String imageUrl,
+
+        @NotBlank(message = "O ISBN não deveria ser nulo ou vazio")
+        String isbn
+
 ) { }

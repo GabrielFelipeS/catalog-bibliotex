@@ -1,5 +1,6 @@
 package com.bibliotex.catalog.controllers;
 
+import com.bibliotex.catalog.TokenProviderIT;
 import com.bibliotex.catalog.customsAsserts.BookAssert;
 import com.bibliotex.catalog.customsAsserts.CatalogAssert;
 import com.bibliotex.catalog.domain.dto.request.BookRequest;
@@ -15,9 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -49,8 +48,8 @@ class BookControllerIT {
                 2025,
                 authorsIds,
                 publisherId,
-                "978-3-16-148410-0",
-                imgUrl
+                imgUrl,
+                "978-3-16-148410-0"
         );
         return bookRequest;
     }
@@ -61,7 +60,7 @@ class BookControllerIT {
     void shouldBeAbleCreateBook() {
         BookRequest bookRequest = getBookRequest("http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api");
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
@@ -100,11 +99,12 @@ class BookControllerIT {
                 1997,
                 authorsIds,
                 publisherId,
-                "9780747532691",
-                "http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+                "http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "9780747532691"
+
         );
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
         System.err.println(response.getBody());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -129,7 +129,7 @@ class BookControllerIT {
                 ""
         );
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         System.err.println(response.getBody());
@@ -180,11 +180,11 @@ class BookControllerIT {
                 1997,
                 authorsIds,
                 publisherId,
-                "9780747532691",
-                "http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+                "http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "9780747532691"
         );
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -205,11 +205,11 @@ class BookControllerIT {
                 1997,
                 authorsIds,
                 publisherId,
-                "9780747532699",
-                "http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+                "http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "9780747532699"
         );
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
@@ -217,7 +217,7 @@ class BookControllerIT {
     @Test
     @DisplayName("Should return book when id exists")
     public void findBookWhenIdExists() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/books/1", String.class);
+        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/books/1", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -237,15 +237,16 @@ class BookControllerIT {
     @Test
     @DisplayName("Should return book when id does not exist")
     public void findBookWhenIdDoesNotExists() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/books/100", String.class);
-
+        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/books/100", String.class);
+        System.err.println(response.getStatusCode());
+        System.err.println(response.getBody());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DisplayName("Should return all books in the catalog")
     void getBooks() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/books/", String.class);
+        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/books/", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -260,11 +261,11 @@ class BookControllerIT {
     @DirtiesContext
     @DisplayName("Should delete book when id exists")
     public void deleteBook() {
-        ResponseEntity<String> response = testRestTemplate.exchange("/books/1", HttpMethod.DELETE, null, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/1", HttpMethod.DELETE, this.getEntity(), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-        response = testRestTemplate.getForEntity("/books/1", String.class);
+        response = testRestTemplate.getForEntity("/catalog/books/1", String.class);
 
         System.err.println(response.getBody());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -281,13 +282,30 @@ class BookControllerIT {
     })
     @DirtiesContext
     @DisplayName("Should be able validating url image")
-    public void shouldBeAbleValidatingUrlImage(String url, boolean isSuccess) {
+    public void shouldBeableValidatingUrlImage(String url, boolean isSuccess) {
         BookRequest bookRequest = getBookRequest(url);
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/books/", bookRequest, String.class);
-
+        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
+        System.err.println(response.getBody());
         System.err.println(response.getStatusCode().is2xxSuccessful());
         System.err.println(isSuccess);
         assertThat(response.getStatusCode().is2xxSuccessful()).isEqualTo(isSuccess);
+        assertThat(response.getStatusCode()).isNotEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    private @NotNull HttpEntity getEntity() {
+        HttpHeaders headers = this.getHttpHeaders();
+        return new HttpEntity(headers);
+    }
+
+    private @NotNull HttpEntity getEntity(BookRequest bookRequest) {
+        HttpHeaders headers = this.getHttpHeaders();
+        return new HttpEntity(bookRequest, headers);
+    }
+
+    private @NotNull HttpHeaders getHttpHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + TokenProviderIT.getAccessToken());
+        return headers;
     }
 }
