@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/books/")
+@RequestMapping("/catalog/books/")
 public class BookController {
     private final KafkaService kafkaService;
     private final BookService bookService;
@@ -27,7 +27,7 @@ public class BookController {
 
         kafkaService.sendMessageCreate(bookResponse);
 
-        URI location = uriBuilder.path("/books/{id}")
+        URI location = uriBuilder.path("/catalog/books/{id}")
                 .buildAndExpand(bookResponse.id())
                 .toUri();
 
