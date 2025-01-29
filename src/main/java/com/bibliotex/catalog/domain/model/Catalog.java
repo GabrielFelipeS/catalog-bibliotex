@@ -14,6 +14,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
+@Table(
+        name = "catalog",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"title", "edition"})
+        }
+)
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Catalog extends BaseEntity {
     @Column(nullable = false)
