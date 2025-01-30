@@ -3,7 +3,6 @@ package com.bibliotex.catalog.controllers;
 import com.bibliotex.catalog.TokenProviderIT;
 import com.bibliotex.catalog.customsAsserts.CatalogAssert;
 import com.bibliotex.catalog.domain.dto.request.MangaRequest;
-import com.bibliotex.catalog.domain.model.Book;
 import com.bibliotex.catalog.domain.model.Manga;
 import com.bibliotex.catalog.services.KafkaService;
 import com.jayway.jsonpath.DocumentContext;
@@ -40,7 +39,7 @@ class MangaControllerIT {
         List<Long> authorsIds = Arrays.asList(1L, 2L);
         Long publisherId = 1L;
         MangaRequest mangaRequest = new MangaRequest(
-                "Naruto",
+                "Titulo Teste",
                 "Naruto Uzumaki é um jovem ninja com o sonho de se tornar o Hokage, o líder de sua vila.",
                 700,
                 "Japonês",
@@ -88,7 +87,7 @@ class MangaControllerIT {
         List<Long> authorsIds = List.of(1L);
         Long publisherId = 100L;
 
-        MangaRequest mangaRequest = new MangaRequest("Naruto",
+        MangaRequest mangaRequest = new MangaRequest("Titulo Teste",
                 "Naruto Uzumaki é um jovem ninja com o sonho de se tornar o Hokage, o líder de sua vila.",
                 700,
                 "Japonês",
@@ -101,7 +100,7 @@ class MangaControllerIT {
                 true);
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/manga/", HttpMethod.POST, this.getEntity(mangaRequest), String.class);
-        System.err.println(response.getBody());
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -128,7 +127,6 @@ class MangaControllerIT {
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/manga/", HttpMethod.POST, this.getEntity(mangaRequest), String.class);
 
-        System.err.println(response.getBody());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         DocumentContext documentContext = JsonPath.parse(response.getBody());
@@ -171,7 +169,7 @@ class MangaControllerIT {
         Long publisherId = 1L;
 
         MangaRequest mangaRequest = new MangaRequest(
-                "Naruto",
+                "Titulo do teste",
                 "Naruto Uzumaki é um jovem ninja com o sonho de se tornar o Hokage, o líder de sua vila.",
                 700,
                 "Japonês",
@@ -211,26 +209,26 @@ class MangaControllerIT {
         );
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/manga/", HttpMethod.POST, this.getEntity(mangaRequest), String.class);
-        System.err.println(response.getBody());
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
     @DisplayName("Should return book when id exists")
     public void findBookWhenIdExists() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/manga/1", String.class);
+        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/manga/4", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Book book = documentContext.read("$.data", Book.class);
+        Manga manga = documentContext.read("$.data", Manga.class);
 
-        CatalogAssert.assertThat(book)
+        CatalogAssert.assertThat(manga)
                 .idNotNull()
                 .idIsPositive()
-                .hasTitle("Harry Potter and the Philosopher's Stone")
-                .hasDescription("First book of the Harry Potter series")
-                .hasPages(223)
+                .hasTitle("Honzuki no gekokujou")
+                .hasDescription("No is the name given to him by Ginny and the only name anyone knows, he is immune to the Spread.")
+                .hasPages(220)
                 .hasLanguage("English")
         ;
     }
