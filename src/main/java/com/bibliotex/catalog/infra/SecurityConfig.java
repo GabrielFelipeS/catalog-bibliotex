@@ -22,6 +22,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/catalog/books/", "/catalog/books/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/catalog/manga/", "/catalog/manga/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/catalog/comic/", "/catalog/comic/{id}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())));
