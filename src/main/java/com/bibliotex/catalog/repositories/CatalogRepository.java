@@ -4,4 +4,5 @@ import com.bibliotex.catalog.domain.model.Catalog;
 import org.springframework.data.repository.CrudRepository;
 
 public interface CatalogRepository extends CrudRepository<Catalog, Long> {
+    boolean existsByTitleEqualsIgnoreCaseAndEdition(String title, Integer edition);
 }
