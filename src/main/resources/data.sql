@@ -59,8 +59,10 @@ INSERT INTO catalog (title, description, pages, language, edition, year_of_relea
 VALUES ('Naruto',
         'Naruto Uzumaki é um jovem ninja com o sonho de se tornar o Hokage, o líder de sua vila.',
         700, 'Japonês',
-        2, 1999, 3,
+        1, 1999, 3,
         'http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api');
+INSERT INTO manga (id, magazine, is_on_going)
+VALUES (5, '', false);
 
 -- Associando Autores aos Mangas
 INSERT INTO catalog_authors (catalog_id, author_id)
@@ -72,10 +74,18 @@ VALUES (4, 4);
 
 -- Inserindo Quadrinhos -----------------------------------------------------------------------------------------------------------------------------------------------
 
+INSERT INTO catalog (title, description, pages, language, edition, year_of_release, image_url, publisher_id)
+VALUES ('Batman',
+        'No is the name given to him by Ginny and the only name anyone knows, he is immune to the Spread.',
+        100,
+        'English',
+        1,
+        2015,
+        'https://comicvine.gamespot.com/a/uploads/original/11/117127/3973631-spread_no.jpg',
+        1);
+INSERT INTO comic (id, universe)
+VALUES (6, 'DC');
+
 -- Associando Autores aos Mangas
 INSERT INTO catalog_authors (catalog_id, author_id)
-VALUES (1, 1);
-INSERT INTO catalog_authors (catalog_id, author_id)
-VALUES (2, 2);
-INSERT INTO catalog_authors (catalog_id, author_id)
-VALUES (3, 3);
+VALUES (5, 1);
