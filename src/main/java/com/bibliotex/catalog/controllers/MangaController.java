@@ -22,9 +22,9 @@ public class MangaController {
     private final MangaService mangaService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createManga(@RequestBody @Valid MangaRequest mangaRequest, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<ApiResponse> create(@RequestBody @Valid MangaRequest mangaRequest, UriComponentsBuilder uriBuilder) {
         MangaResponse mangaResponse = mangaService.create(mangaRequest);
-
+        System.err.println(mangaResponse);
         kafkaService.sendMessageCreate(mangaResponse);
 
         URI location = uriBuilder.path("/catalog/manga/{id}")
@@ -35,21 +35,21 @@ public class MangaController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findAllMangas() {
+    public ResponseEntity<ApiResponse> findAll() {
         List<MangaResponse> mangaResponse = mangaService.findAll();
 
         return ResponseEntity.ok(new ApiResponse("Mangas encontrados com sucesso!", mangaResponse));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> findMangaById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> findById(@PathVariable Long id) {
         MangaResponse mangaResponse = mangaService.findBy(id);
 
         return ResponseEntity.ok(new ApiResponse("Manga encontrado com sucesso!", mangaResponse));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMangayId(@PathVariable Long id) {
+    public ResponseEntity<?> deleteById(@PathVariable Long id) {
         mangaService.deleteById(id);
 
         return ResponseEntity.noContent().build();

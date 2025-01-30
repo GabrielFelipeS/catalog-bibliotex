@@ -35,21 +35,21 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findAllBooks() {
+    public ResponseEntity<ApiResponse> findAll() {
         List<BookResponse> booksResponses = bookService.findAll();
 
         return ResponseEntity.ok(new ApiResponse("Livros encontrados com sucesso!", booksResponses));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> findBookById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> findById(@PathVariable Long id) {
         BookResponse bookResponse = bookService.findBy(id);
 
         return ResponseEntity.ok(new ApiResponse("Livros encontrados com sucesso!", bookResponse));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBookById(@PathVariable Long id) {
+    public ResponseEntity<?> deleteById(@PathVariable Long id) {
         bookService.deleteById(id);
 
         return ResponseEntity.noContent().build();
