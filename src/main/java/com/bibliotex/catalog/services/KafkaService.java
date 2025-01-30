@@ -1,6 +1,7 @@
 package com.bibliotex.catalog.services;
 
 import com.bibliotex.catalog.domain.dto.response.BookResponse;
+import com.bibliotex.catalog.domain.dto.response.ComicResponse;
 import com.bibliotex.catalog.domain.dto.response.MangaResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -15,12 +16,16 @@ public class KafkaService {
         kafkaTemplate.send(topicName, body);
     }
 
-    public void sendMessageCreate(BookResponse bookResponse) {
-        this.sendMessage("catalog-create-book", bookResponse);
+    public void sendMessageCreate(BookResponse response) {
+        this.sendMessage("catalog-create-book", response);
     }
 
-    public void sendMessageCreate(MangaResponse mangaResponse) {
-        this.sendMessage("catalog-create-manga", mangaResponse);
+    public void sendMessageCreate(MangaResponse response) {
+        this.sendMessage("catalog-create-manga", response);
+    }
+
+    public void sendMessageCreate(ComicResponse response) {
+        this.sendMessage("catalog-create-manga", response);
     }
 
 }
