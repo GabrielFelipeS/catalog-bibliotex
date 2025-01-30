@@ -91,7 +91,7 @@ class BookControllerIT {
         Long publisherId = 100L;
 
         BookRequest bookRequest = new BookRequest(
-                "Harry Potter and the Philosopher's Stone",
+                "Titulo de teste",
                 "First book of the Harry Potter series",
                 223,
                 "English",
@@ -172,8 +172,8 @@ class BookControllerIT {
         Long publisherId = 1L;
 
         BookRequest bookRequest = new BookRequest(
-                "Harry Potter and the Philosopher's Stone",
-                "First book of the Harry Potter series",
+                "Titulo teste",
+                "Should be not able create new book with valid book values",
                 223,
                 "English",
                 1,
