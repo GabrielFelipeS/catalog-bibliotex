@@ -7,14 +7,14 @@ import java.util.List;
 
 public record BookRequest (
         @NotBlank(message = "O titulo não deveria ser nulo ou vazio")
-    String title,
+        String title,
 
         @NotBlank(message = "A descrição não deveria ser nula ou vazia")
-    String description,
+        String description,
 
         @NotNull(message = "A páginas não deve ser nulo")
         @Positive(message = "A quantidade de páginas deve ser maior que zero")
-    Integer pages,
+        Integer pages,
 
         @NotBlank(message = "A lingua não deveria ser nula ou vazia")
         String language,
@@ -25,7 +25,7 @@ public record BookRequest (
 
         @NotNull(message = "O ano de lançamento não deve ser nulo")
         @Positive(message = "A quantidade de páginas deve ser maior que zero")
-    Integer yearOfRelease,
+        Integer yearOfRelease,
 
         @NotEmpty(message = "A lista de IDs de autores não deve ser vazia")
         @NotNull(message = "A lista de IDs dos autores não deve ser nulo")
