@@ -22,8 +22,8 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createBook(@RequestBody @Valid BookRequest bookRequest, UriComponentsBuilder uriBuilder) {
-        BookResponse bookResponse = bookService.createBook(bookRequest);
+    public ResponseEntity<ApiResponse> create(@RequestBody @Valid BookRequest bookRequest, UriComponentsBuilder uriBuilder) {
+        BookResponse bookResponse = bookService.create(bookRequest);
 
         kafkaService.sendMessageCreate(bookResponse);
 

@@ -19,16 +19,10 @@ public class BookService {
     private final BookMapper bookMapper;
     private final AuthorService authorService;
     private final PublisherService publisherService;
-    private final ImageValidationService imageValidationService;
+    private final ValidatorService validatorService;
 
-    public BookResponse createBook(BookRequest bookRequest) {
-        boolean isInvalidUrlImage = imageValidationService.isInvalid(bookRequest.imageUrl());
-
-        if (isInvalidUrlImage) throw new IllegalStateException("A imagem fornecida não existe");
-
-        boolean isbnAlreadyExists = bookRepository.existsBookByIsbn(bookRequest.isbn());
-
-        if (isbnAlreadyExists) throw new IllegalStateException("Isbn já existe");
+    public BookResponse create(BookRequest bookRequest) {
+        validatorService.isValidOrThrow(bookRequest);
 
         var authors = authorService.findById(bookRequest.authorsIds());
         var publisher = publisherService.findById(bookRequest.publisherId());
