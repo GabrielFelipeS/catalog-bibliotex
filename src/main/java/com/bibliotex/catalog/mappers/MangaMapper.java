@@ -38,7 +38,7 @@ public class MangaMapper {
                 manga.getEdition(),
                 manga.getYearOfRelease(),
                 manga.getImageUrl(),
-                manga.getIsOngoing(),
+                manga.getIsOnGoing(),
                 manga.getMagazine(),
                 manga.getAuthors(),
                 manga.getPublisher()

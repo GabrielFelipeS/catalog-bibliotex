@@ -14,7 +14,7 @@ public record MangaResponse(
         Integer edition,
         Integer yearOfRelease,
         String imageUrl,
-        Boolean isOngoing,
+        Boolean isOnGoing,
         String magazine,
         List<Author> authors,
         Publisher publisher
