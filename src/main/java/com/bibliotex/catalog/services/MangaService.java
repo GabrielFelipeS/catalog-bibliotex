@@ -18,23 +18,22 @@ public class MangaService {
     private final MangaRepository mangaRepository;
     private final AuthorService authorService;
     private final PublisherService publisherService;
-    private final ImageValidationService imageValidationService;
     private final MangaMapper mangaMapper;
+    private final ValidatorService validatorService;
 
     public MangaResponse create(MangaRequest mangaRequest) {
-        boolean isInvalidUrlImage = imageValidationService.isInvalid(mangaRequest.imageUrl());
-
-        if (isInvalidUrlImage) throw new IllegalStateException("A imagem fornecida não existe");
-        System.err.println("passou 1");
-//        boolean isbnAlreadyExists = mangaRepository.existsBookByIsbn(mangaRequest.isbn());
-//
-//        if (isbnAlreadyExists) throw new IllegalStateException("Isbn já existe");
+        validatorService.isValidOrThrow(mangaRequest);
 
         var authors = authorService.findById(mangaRequest.authorsIds());
         var publisher = publisherService.findById(mangaRequest.publisherId());
+        System.err.println("publisher: " + publisher);
+        System.err.println("authors: " + authors);
 
-        System.err.println("passou 2");
         Manga manga = mangaMapper.toEntity(mangaRequest, authors, publisher);
+
+        System.err.println("manga: " + manga);
+        System.err.println("publisher: " + manga.getPublisher());
+        System.err.println("authors: " + manga.getAuthors());
 
         manga = mangaRepository.save(manga);
 
