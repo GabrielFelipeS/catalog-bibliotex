@@ -44,9 +44,17 @@ public record MangaRequest (
                 regexp = "^http(|s)://books\\.google\\.com/books/content\\?id=[a-zA-Z0-9_-]+(&.*)?$")
         String imageUrl,
 
-        @NotBlank(message = "A magazine não deveria ser nulo ou vazio")
-        String magazine,
+        @NotNull(message = ValidationMessages.HAS_ADAPTATION_NOT_NULL)
+        Boolean hasAdaptation,
 
-        @NotNull(message = "isOngoing não deveria ser nulo")
-        Boolean isOngoing
+        @NotBlank(message = ValidationMessages.PUBLICATION_STATUS_NOT_BLANK)
+        String publicationStatus,
+
+        @NotBlank(message = ValidationMessages.CLASSIFICATION_NOT_BLANK)
+        String classification,
+
+        @NotNull(message = ValidationMessages.GENRE_ID_NOT_NULL)
+        @NotEmpty(message = ValidationMessages.GENRES_ID_NOT_EMPTY)
+        List<@Positive(message = ValidationMessages.GENRE_ID_MUST_ZERO) Long> genresIds
+
 ) { }

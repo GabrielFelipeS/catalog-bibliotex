@@ -41,7 +41,20 @@ public record BookRequest (
                 regexp = "^http(|s)://books\\.google\\.com/books/content\\?id=[a-zA-Z0-9_-]+(&.*)?$")
         String imageUrl,
 
-        @NotBlank(message = "O ISBN não deveria ser nulo ou vazio")
-        String isbn
+        @NotBlank(message = ValidationMessages.ISBN_NOT_BLANK)
+        String isbn,
+
+        @NotNull(message = ValidationMessages.HAS_ADAPTATION_NOT_NULL)
+        Boolean hasAdaptation,
+
+        @NotBlank(message = ValidationMessages.PUBLICATION_STATUS_NOT_BLANK)
+        String publicationStatus,
+
+        @NotBlank(message = ValidationMessages.CLASSIFICATION_NOT_BLANK)
+        String classification,
+
+        @NotNull(message = ValidationMessages.GENRE_ID_NOT_NULL)
+        @NotEmpty(message = ValidationMessages.GENRES_ID_NOT_EMPTY)
+        List<@Positive(message = ValidationMessages.GENRE_ID_MUST_ZERO) Long> genresIds
 
 ) { }
