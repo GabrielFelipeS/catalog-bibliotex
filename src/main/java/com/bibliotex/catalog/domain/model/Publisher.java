@@ -1,5 +1,6 @@
 package com.bibliotex.catalog.domain.model;
 
+import com.bibliotex.catalog.domain.model.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
