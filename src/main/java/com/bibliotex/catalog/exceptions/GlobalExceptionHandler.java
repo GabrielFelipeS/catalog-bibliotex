@@ -28,7 +28,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value
-            = {NoSuchElementException.class, BookNotFoundException.class, AuthorNotFoundException.class, PublisherNotFoundException.class, ComicNotFoundException.class})
+            = {NoSuchElementException.class, BookNotFoundException.class, AuthorNotFoundException.class, PublisherNotFoundException.class, ComicNotFoundException.class, GenreNotFoundException.class})
     protected ResponseEntity<Object> handleNotFound(RuntimeException ex, WebRequest request) {
         var errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
 
