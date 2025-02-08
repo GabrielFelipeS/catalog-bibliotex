@@ -1,4 +1,4 @@
-package com.bibliotex.catalog.domain.model;
+package com.bibliotex.catalog.domain.model.base;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,4 +25,6 @@ public class BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @UpdateTimestamp
+    private LocalDateTime deletedAt;
 }
