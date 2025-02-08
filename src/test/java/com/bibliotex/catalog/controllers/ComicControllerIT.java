@@ -3,6 +3,7 @@ package com.bibliotex.catalog.controllers;
 import com.bibliotex.catalog.TokenProviderIT;
 import com.bibliotex.catalog.customsAsserts.CatalogAssert;
 import com.bibliotex.catalog.domain.dto.request.ComicRequest;
+import com.bibliotex.catalog.domain.messsages.ValidationMessages;
 import com.bibliotex.catalog.domain.model.Comic;
 import com.bibliotex.catalog.domain.model.Manga;
 import com.bibliotex.catalog.services.KafkaService;
@@ -50,7 +51,11 @@ class ComicControllerIT {
                 authorsIds,
                 publisherId,
                 "Edição especial",
-                imgUrl
+                imgUrl,
+                true,
+                "COMPLETED",
+                "EVERYONE",
+                List.of(1L, 2L)
         );
     }
 
@@ -95,7 +100,11 @@ class ComicControllerIT {
                 List.of(1L, 2L),
                 123L,
                 "Edição especial",
-                "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+                "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                true,
+                "COMPLETED",
+                "EVERYOUNE",
+                List.of(1L, 2L)
         );
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/comic/", HttpMethod.POST, this.getEntity(request), String.class);
@@ -120,17 +129,18 @@ class ComicControllerIT {
                 authorsIds,
                 publisherId,
                 "",
-                ""
+                "",
+                null,
+                "",
+                "",
+                List.of(-1L, 0L)
         );
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/comic/", HttpMethod.POST, this.getEntity(request), String.class);
-
+        System.err.println(response.getBody());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         DocumentContext documentContext = JsonPath.parse(response.getBody());
-        int fieldsError = documentContext.read("$.length()");
-
-        assertThat(fieldsError).isEqualTo(11);
 
         List<String> errorsTitle = documentContext.read("$.title");
         List<String> errorsDescription = documentContext.read("$.description");
@@ -143,18 +153,33 @@ class ComicControllerIT {
         List<String> errorsUniverse = documentContext.read("$.universe");
         List<String> errorsAuthorsIds1 = documentContext.read("$.['authorsIds[1]']");
         List<String> errorsAuthorsIds2 = documentContext.read("$.['authorsIds[2]']");
+        List<String> errorsGenresIds1 = documentContext.read("$.['genresIds[0]']");
+        List<String> errorsGenresIds2 = documentContext.read("$.['genresIds[1]']");
+        List<String> errorsHasAdaptation = documentContext.read("$.hasAdaptation");
+        List<String> errorsPublicationStatus = documentContext.read("$.publicationStatus");
+        List<String> errorsClassification = documentContext.read("$.classification");
 
-        assertThat(errorsTitle).containsExactlyInAnyOrder("O titulo não deveria ser nulo ou vazio");
-        assertThat(errorsDescription).containsExactlyInAnyOrder("A descrição não deveria ser nula ou vazia");
-        assertThat(errorsPages).containsExactlyInAnyOrder("A quantidade de páginas deve ser maior que zero");
-        assertThat(errorsLanguage).containsExactlyInAnyOrder("A lingua não deveria ser nula ou vazia");
-        assertThat(errorsEdition).containsExactlyInAnyOrder("A edição deve ser maior que zero");
-        assertThat(errorsYearOfRelease).containsExactlyInAnyOrder("A quantidade de páginas deve ser maior que zero");
-        assertThat(errorsPublisherId).containsExactlyInAnyOrder("A quantidade de páginas deve ser maior que zero");
-        assertThat(errorsImageUrl).containsExactlyInAnyOrder("A imageUrl não deveria ser nulo ou vazio", "O endereço da imagem não é valido, por favor insira outro");
-        assertThat(errorsAuthorsIds1).containsExactlyInAnyOrder("O id do autor deve ser maior que zero");
-        assertThat(errorsAuthorsIds2).containsExactlyInAnyOrder("O id do autor deve ser maior que zero");
-        assertThat(errorsUniverse).containsExactlyInAnyOrder("Universo não deve ser vazio");
+        assertThat(errorsTitle).containsExactlyInAnyOrder(ValidationMessages.TITLE_NOT_BLANK);
+        assertThat(errorsDescription).containsExactlyInAnyOrder(ValidationMessages.DESCRIPTION_NOT_BLANK);
+        assertThat(errorsPages).containsExactlyInAnyOrder(ValidationMessages.PAGES_QUANTITY_MUST_ZERO);
+        assertThat(errorsLanguage).containsExactlyInAnyOrder(ValidationMessages.LANGUAGE_NOT_BLANK);
+        assertThat(errorsEdition).containsExactlyInAnyOrder(ValidationMessages.EDITION_QUANTITY_MUST_ZERO);
+        assertThat(errorsYearOfRelease).containsExactlyInAnyOrder(ValidationMessages.YEAR_OF_RELEASE_MUST_ZERO);
+        assertThat(errorsPublisherId).containsExactlyInAnyOrder(ValidationMessages.PUBLISHER_ID_MUST_ZERO);
+        assertThat(errorsImageUrl).containsExactlyInAnyOrder(ValidationMessages.IMAGE_NOT_BLANK, ValidationMessages.IMAGE_VALID);
+        assertThat(errorsAuthorsIds1).containsExactlyInAnyOrder(ValidationMessages.AUTHOR_ID_MUST_ZERO);
+        assertThat(errorsAuthorsIds2).containsExactlyInAnyOrder(ValidationMessages.AUTHOR_ID_MUST_ZERO);
+
+        assertThat(errorsGenresIds1).containsExactlyInAnyOrder(ValidationMessages.GENRE_ID_MUST_ZERO);
+        assertThat(errorsGenresIds2).containsExactlyInAnyOrder(ValidationMessages.GENRE_ID_MUST_ZERO);
+        assertThat(errorsHasAdaptation).containsExactlyInAnyOrder(ValidationMessages.HAS_ADAPTATION_NOT_NULL);
+        assertThat(errorsPublicationStatus).containsExactlyInAnyOrder(ValidationMessages.PUBLICATION_STATUS_NOT_BLANK);
+        assertThat(errorsClassification).containsExactlyInAnyOrder(ValidationMessages.CLASSIFICATION_NOT_BLANK);
+
+        assertThat(errorsUniverse).containsExactlyInAnyOrder(ValidationMessages.UNVERSE_NOT_BLANK);
+
+        int fieldsError = documentContext.read("$.length()");
+        assertThat(fieldsError).isEqualTo(16);
     }
 
     @Test
@@ -174,7 +199,11 @@ class ComicControllerIT {
                 authorsIds,
                 publisherId,
                 "Edição especial",
-                "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+                "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                true,
+                "COMPLETED",
+                "EVERYONE",
+                List.of(1L, 2L)
         );
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/comic/", HttpMethod.POST, this.getEntity(request), String.class);
@@ -199,7 +228,11 @@ class ComicControllerIT {
                 authorsIds,
                 publisherId,
                 "Edição especial",
-                "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+                "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                true,
+                "COMPLETED",
+                "EVERYONE",
+                List.of(1L, 2L)
         );
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/comic/", HttpMethod.POST, this.getEntity(request), String.class);
