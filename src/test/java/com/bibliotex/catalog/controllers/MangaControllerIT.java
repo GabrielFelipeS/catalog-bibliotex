@@ -3,9 +3,8 @@ package com.bibliotex.catalog.controllers;
 import com.bibliotex.catalog.TokenProviderIT;
 import com.bibliotex.catalog.customsAsserts.CatalogAssert;
 import com.bibliotex.catalog.domain.dto.request.MangaRequest;
+import com.bibliotex.catalog.domain.dto.response.MangaResponse;
 import com.bibliotex.catalog.domain.messsages.ValidationMessages;
-import com.bibliotex.catalog.domain.model.Manga;
-import com.bibliotex.catalog.services.KafkaService;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,13 +33,12 @@ class MangaControllerIT {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @Autowired
-    private KafkaService kafkaService;
 
     private static @NotNull MangaRequest getMangaRequest(String imgUrl) {
         List<Long> authorsIds = Arrays.asList(1L, 2L);
         Long publisherId = 1L;
-        MangaRequest mangaRequest = new MangaRequest(
+
+        return new MangaRequest(
                 "Titulo Teste",
                 "Naruto Uzumaki é um jovem ninja com o sonho de se tornar o Hokage, o líder de sua vila.",
                 "Descição",
@@ -55,8 +54,6 @@ class MangaControllerIT {
                 "EVERYONE",
                 List.of(1L, 2L)
         );
-
-        return mangaRequest;
     }
 
     @Test
@@ -65,20 +62,17 @@ class MangaControllerIT {
     void shouldBeAbleCreateBook() {
         MangaRequest mangaRequest = getMangaRequest("http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api");
 
-        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/manga/", HttpMethod.POST, this.getEntity(mangaRequest), String.class);
+        ResponseEntity<MangaResponse> response = testRestTemplate.exchange("/catalog/manga/", HttpMethod.POST, this.getEntity(mangaRequest), MangaResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         String location = Objects.requireNonNull(response.getHeaders().getLocation()).getPath();
 
-        response = testRestTemplate.getForEntity(location, String.class);
+        response = testRestTemplate.getForEntity(location, MangaResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Manga manga = documentContext.read("$.data", Manga.class);
-
-        CatalogAssert.assertThat(manga)
+        CatalogAssert.assertThat(response.getBody())
                 .idNotNull()
                 .isValid(mangaRequest)
         ;
@@ -244,14 +238,11 @@ class MangaControllerIT {
     @Test
     @DisplayName("Should return book when id exists")
     public void findBookWhenIdExists() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/manga/4", String.class);
+        ResponseEntity<MangaResponse> response = testRestTemplate.getForEntity("/catalog/manga/4", MangaResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Manga manga = documentContext.read("$.data", Manga.class);
-
-        CatalogAssert.assertThat(manga)
+        CatalogAssert.assertThat(response.getBody())
                 .idNotNull()
                 .idIsPositive()
                 .hasTitle("Ascendance of a Bookworm")
@@ -265,23 +256,23 @@ class MangaControllerIT {
     @DisplayName("Should return book when id does not exist")
     public void findBookWhenIdDoesNotExists() {
         ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/manga/100", String.class);
-        System.err.println(response.getStatusCode());
-        System.err.println(response.getBody());
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DisplayName("Should return all books in the catalog")
     void getBooks() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/manga/", String.class);
+        ResponseEntity<List<MangaResponse>> response = testRestTemplate.exchange(
+                "/catalog/manga/",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                });
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-
-        List<Manga> mangas = documentContext.read("$.data");
-
-        assertThat(mangas).isNotEmpty();
+        assertThat(response.getBody()).isNotEmpty();
     }
 
     @Test
@@ -294,7 +285,6 @@ class MangaControllerIT {
 
         response = testRestTemplate.getForEntity("/catalog/manga/1", String.class);
 
-        System.err.println(response.getBody());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -314,20 +304,18 @@ class MangaControllerIT {
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/manga/", HttpMethod.POST, this.getEntity(mangaRequest), String.class);
 
-        System.err.println(response.getStatusCode().is2xxSuccessful());
-        System.err.println(isSuccess);
         assertThat(response.getStatusCode().is2xxSuccessful()).isEqualTo(isSuccess);
         assertThat(response.getStatusCode()).isNotEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
-    private @NotNull HttpEntity getEntity() {
+    private @NotNull HttpEntity<?> getEntity() {
         HttpHeaders headers = this.getHttpHeaders();
-        return new HttpEntity(headers);
+        return new HttpEntity<>(headers);
     }
 
-    private @NotNull HttpEntity getEntity(MangaRequest mangaRequest) {
+    private @NotNull HttpEntity<?> getEntity(MangaRequest mangaRequest) {
         HttpHeaders headers = this.getHttpHeaders();
-        return new HttpEntity(mangaRequest, headers);
+        return new HttpEntity<>(mangaRequest, headers);
     }
 
     private @NotNull HttpHeaders getHttpHeaders() {

@@ -4,49 +4,55 @@ package com.bibliotex.catalog.customsAsserts;
 import com.bibliotex.catalog.domain.dto.request.BookRequest;
 import com.bibliotex.catalog.domain.dto.request.ComicRequest;
 import com.bibliotex.catalog.domain.dto.request.MangaRequest;
-import com.bibliotex.catalog.domain.model.Catalog;
+import com.bibliotex.catalog.domain.dto.response.BookResponse;
+import com.bibliotex.catalog.domain.dto.response.CatalogResponse;
+import com.bibliotex.catalog.domain.dto.response.ComicResponse;
+import com.bibliotex.catalog.domain.dto.response.MangaResponse;
+import com.bibliotex.catalog.mappers.CatalogMapper;
 import org.assertj.core.api.AbstractAssert;
 
 import java.util.List;
 
-public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
+public class CatalogAssert extends AbstractAssert<CatalogAssert, CatalogResponse> {
 
-    protected CatalogAssert(Catalog catalog) {
+    protected CatalogAssert(CatalogResponse catalog) {
         super(catalog, CatalogAssert.class);
     }
 
-    public static CatalogAssert assertThat(Catalog catalog) {
-        return new CatalogAssert(catalog);
+    public static CatalogAssert assertThat(MangaResponse catalog) {
+        return new CatalogAssert(CatalogMapper.toDTO(catalog));
+    }
+
+    public static CatalogAssert assertThat(BookResponse catalog) {
+        return new CatalogAssert(CatalogMapper.toDTO(catalog));
+    }
+
+    public static CatalogAssert assertThat(ComicResponse catalog) {
+        return new CatalogAssert(CatalogMapper.toDTO(catalog));
     }
 
     public CatalogAssert isValid(ComicRequest request) {
         isNotNull();
 
-        this.isValid(request.title(), request.description(), request.pages(),
+        return this.isValid(request.title(), request.description(), request.pages(),
                 request.language(), request.edition(), request.yearOfRelease(),
                 request.imageUrl(), request.authorsIds(), request.publisherId());
-
-        return this;
     }
 
     public CatalogAssert isValid(BookRequest request) {
         isNotNull();
 
-        this.isValid(request.title(), request.description(), request.pages(),
+        return this.isValid(request.title(), request.description(), request.pages(),
                 request.language(), request.edition(), request.yearOfRelease(),
                 request.imageUrl(), request.authorsIds(), request.publisherId());
-
-        return this;
     }
 
     public CatalogAssert isValid(MangaRequest request) {
         isNotNull();
 
-        this.isValid(request.title(), request.description(), request.pages(),
+        return this.isValid(request.title(), request.description(), request.pages(),
                 request.language(), request.edition(), request.yearOfRelease(),
                 request.imageUrl(), request.authorsIds(), request.publisherId());
-
-        return this;
     }
 
     public CatalogAssert isValid(String title, String description, Integer pages,
@@ -54,22 +60,23 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
                                  List<Long> authorsIds, Long publisherId) {
         isNotNull();
 
-        this.hasTitle(title);
-        this.hasDescription(description);
-        this.hasEdition(edition);
-        this.hasPages(pages);
-        this.hasImageUrl(imageUrl);
-        this.hasYearOfRelease(yearOfRelease);
-        this.hasLanguage(language);
+        return this
+                .hasTitle(title)
+                .hasDescription(description)
+                .hasEdition(edition)
+                .hasPages(pages)
+                .hasImageUrl(imageUrl)
+                .hasYearOfRelease(yearOfRelease)
+                .hasLanguage(language)
+                ;
 
-        return this;
     }
 
 
     public CatalogAssert idNotNull() {
         isNotNull();
 
-        if (actual.getId() == null) {
+        if (actual.id() == null) {
             failWithMessage("Esperava que o id não fosse nulo");
         }
 
@@ -79,7 +86,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert idIsPositive() {
         isNotNull();
 
-        if (actual.getId() <= 0) {
+        if (actual.id() <= 0) {
             failWithMessage("Esperava que o id fosse positivo");
         }
 
@@ -88,7 +95,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
 
     public CatalogAssert hasTitle(String title) {
         isNotNull();
-        String actualTitle = actual.getTitle();
+        String actualTitle = actual.title();
 
         if (!actualTitle.equals(title)) {
             failWithMessage("Esperava que o titulo fosse %s, mas era %s", title, actualTitle);
@@ -100,7 +107,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert hasDescription(String description) {
         isNotNull();
 
-        String actualDescription = actual.getDescription();
+        String actualDescription = actual.description();
 
         if (!actualDescription.equals(description)) {
             failWithMessage("Esperava que o description fosse %s, mas era %s", description, actualDescription);
@@ -112,7 +119,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert hasPages(Integer pages) {
         isNotNull();
 
-        Integer actualPages = actual.getPages();
+        Integer actualPages = actual.pages();
 
         if (!actualPages.equals(pages)) {
             failWithMessage("Esperava que o pages fosse %s, mas era %s", actualPages, pages);
@@ -124,7 +131,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert hasLanguage(String language) {
         isNotNull();
 
-        String actualLanguage = actual.getLanguage();
+        String actualLanguage = actual.language();
 
         if (!actualLanguage.equals(language)) {
             failWithMessage("Esperava que o language fosse %s, mas era %s", actualLanguage, language);
@@ -136,7 +143,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert hasEdition(Integer edition) {
         isNotNull();
 
-        Integer actualEdition = actual.getEdition();
+        Integer actualEdition = actual.edition();
 
         if (!actualEdition.equals(edition)) {
             failWithMessage("Esperava que o edition fosse %s, mas era %s", actualEdition, edition);
@@ -148,7 +155,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert hasYearOfRelease(Integer yearOfRelease) {
         isNotNull();
 
-        Integer actualYearOfRelease = actual.getYearOfRelease();
+        Integer actualYearOfRelease = actual.yearOfRelease();
 
         if (!actualYearOfRelease.equals(yearOfRelease)) {
             failWithMessage("Esperava que o yearOfRelease fosse %s, mas era %s", actualYearOfRelease, yearOfRelease);
@@ -160,7 +167,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert hasImageUrl(String imageUrl) {
         isNotNull();
 
-        String actualImageUrl = actual.getImageUrl();
+        String actualImageUrl = actual.imageUrl();
 
         if (!actualImageUrl.equals(imageUrl)) {
             failWithMessage("Esperava que o imageUrl fosse %s, mas era %s", actualImageUrl, imageUrl);
@@ -172,7 +179,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert titleIsNotBlank() {
         isNotNull();
 
-        String actualTitle = actual.getTitle();
+        String actualTitle = actual.title();
         if (!actualTitle.isBlank()) {
             failWithMessage("Esperava que o titulo não fosse fosse %s vazio", actualTitle);
         }
@@ -183,7 +190,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert descriptionIsNotBlank() {
         isNotNull();
 
-        String actualDescription = actual.getDescription();
+        String actualDescription = actual.description();
         if (!actualDescription.isBlank()) {
             failWithMessage("Esperava que o titulo não fosse fosse %s vazio", actualDescription);
         }
@@ -194,7 +201,7 @@ public class CatalogAssert extends AbstractAssert<CatalogAssert, Catalog> {
     public CatalogAssert languageIsNotBlank() {
         isNotNull();
 
-        String actualLanguage = actual.getLanguage();
+        String actualLanguage = actual.language();
         if (!actualLanguage.isBlank()) {
             failWithMessage("Esperava que o titulo não fosse fosse %s vazio", actualLanguage);
         }

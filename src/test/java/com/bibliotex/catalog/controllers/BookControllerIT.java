@@ -4,9 +4,8 @@ import com.bibliotex.catalog.TokenProviderIT;
 import com.bibliotex.catalog.customsAsserts.BookAssert;
 import com.bibliotex.catalog.customsAsserts.CatalogAssert;
 import com.bibliotex.catalog.domain.dto.request.BookRequest;
+import com.bibliotex.catalog.domain.dto.response.BookResponse;
 import com.bibliotex.catalog.domain.messsages.ValidationMessages;
-import com.bibliotex.catalog.domain.model.Book;
-import com.bibliotex.catalog.services.KafkaService;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,13 +34,10 @@ class BookControllerIT {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @Autowired
-    private KafkaService kafkaService;
-
     private static @NotNull BookRequest getBookRequest(String imgUrl) {
         List<Long> authorsIds = Arrays.asList(1L, 2L);
         Long publisherId = 1L;
-        BookRequest bookRequest = new BookRequest(
+        return new BookRequest(
                 "Título do Livro",
                 "Descrição detalhada do livro.",
                 350,
@@ -56,7 +53,6 @@ class BookControllerIT {
                 "EVERYONE",
                 List.of(1L, 2L)
         );
-        return bookRequest;
     }
 
     @Test
@@ -65,25 +61,24 @@ class BookControllerIT {
     void shouldBeAbleCreateBook() {
         BookRequest bookRequest = getBookRequest("http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api");
 
-        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
+        ResponseEntity<BookResponse> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), BookResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         String location = Objects.requireNonNull(response.getHeaders().getLocation()).getPath();
 
-        response = testRestTemplate.getForEntity(location, String.class);
+        response = testRestTemplate.getForEntity(location, BookResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Book book = documentContext.read("$.data", Book.class);
+        BookResponse bookResponse = response.getBody();
 
-        CatalogAssert.assertThat(book)
+        CatalogAssert.assertThat(bookResponse)
                 .idNotNull()
                 .isValid(bookRequest)
         ;
 
-        BookAssert.assertThat(book)
+        BookAssert.assertThat(bookResponse)
                 .hasIsbnNoSpecialCharacter(bookRequest.isbn())
         ;
     }
@@ -114,7 +109,7 @@ class BookControllerIT {
         );
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
-        System.err.println(response.getBody());
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -249,14 +244,11 @@ class BookControllerIT {
     @Test
     @DisplayName("Should return book when id exists")
     public void findBookWhenIdExists() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/books/1", String.class);
+        ResponseEntity<BookResponse> response = testRestTemplate.getForEntity("/catalog/books/1", BookResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Book book = documentContext.read("$.data", Book.class);
-
-        CatalogAssert.assertThat(book)
+        CatalogAssert.assertThat(response.getBody())
                 .idNotNull()
                 .idIsPositive()
                 .hasTitle("Harry Potter and the Philosopher's Stone")
@@ -270,23 +262,24 @@ class BookControllerIT {
     @DisplayName("Should return book when id does not exist")
     public void findBookWhenIdDoesNotExists() {
         ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/books/100", String.class);
-        System.err.println(response.getStatusCode());
-        System.err.println(response.getBody());
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DisplayName("Should return all books in the catalog")
     void getBooks() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/books/", String.class);
+        ResponseEntity<List<BookResponse>> response = testRestTemplate.exchange(
+                "/catalog/books/",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                } // Usando ParameterizedTypeReference
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-
-        List<Book> books = documentContext.read("$.data");
-
-        assertThat(books).isNotEmpty();
+        assertThat(response.getBody()).isNotEmpty();
     }
 
     @Test
@@ -318,21 +311,19 @@ class BookControllerIT {
         BookRequest bookRequest = getBookRequest(url);
 
         ResponseEntity<String> response = testRestTemplate.exchange("/catalog/books/", HttpMethod.POST, this.getEntity(bookRequest), String.class);
-        System.err.println(response.getBody());
-        System.err.println(response.getStatusCode().is2xxSuccessful());
-        System.err.println(isSuccess);
+
         assertThat(response.getStatusCode().is2xxSuccessful()).isEqualTo(isSuccess);
         assertThat(response.getStatusCode()).isNotEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
-    private @NotNull HttpEntity getEntity() {
+    private @NotNull HttpEntity<?> getEntity() {
         HttpHeaders headers = this.getHttpHeaders();
-        return new HttpEntity(headers);
+        return new HttpEntity<>(headers);
     }
 
-    private @NotNull HttpEntity getEntity(BookRequest bookRequest) {
+    private @NotNull HttpEntity<?> getEntity(BookRequest bookRequest) {
         HttpHeaders headers = this.getHttpHeaders();
-        return new HttpEntity(bookRequest, headers);
+        return new HttpEntity<>(bookRequest, headers);
     }
 
     private @NotNull HttpHeaders getHttpHeaders() {

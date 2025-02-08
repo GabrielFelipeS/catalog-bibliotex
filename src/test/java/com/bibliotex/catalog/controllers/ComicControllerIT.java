@@ -3,10 +3,8 @@ package com.bibliotex.catalog.controllers;
 import com.bibliotex.catalog.TokenProviderIT;
 import com.bibliotex.catalog.customsAsserts.CatalogAssert;
 import com.bibliotex.catalog.domain.dto.request.ComicRequest;
+import com.bibliotex.catalog.domain.dto.response.ComicResponse;
 import com.bibliotex.catalog.domain.messsages.ValidationMessages;
-import com.bibliotex.catalog.domain.model.Comic;
-import com.bibliotex.catalog.domain.model.Manga;
-import com.bibliotex.catalog.services.KafkaService;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,9 +32,6 @@ class ComicControllerIT {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
-
-    @Autowired
-    private KafkaService kafkaService;
 
     private static @NotNull ComicRequest getComicRequest(String imgUrl) {
         List<Long> authorsIds = Arrays.asList(1L, 2L);
@@ -65,20 +61,17 @@ class ComicControllerIT {
     void shouldBeAbleCreateBook() {
         ComicRequest comicRequest = getComicRequest("http://books.google.com/books/content?id=r5mdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api");
 
-        ResponseEntity<String> response = testRestTemplate.exchange("/catalog/comic/", HttpMethod.POST, this.getEntity(comicRequest), String.class);
-        System.err.println(response.getBody());
+        ResponseEntity<ComicResponse> response = testRestTemplate.exchange("/catalog/comic/", HttpMethod.POST, this.getEntity(comicRequest), ComicResponse.class);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         String location = Objects.requireNonNull(response.getHeaders().getLocation()).getPath();
 
-        response = testRestTemplate.getForEntity(location, String.class);
+        response = testRestTemplate.getForEntity(location, ComicResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Comic comic = documentContext.read("$.data", Comic.class);
-
-        CatalogAssert.assertThat(comic)
+        CatalogAssert.assertThat(response.getBody())
                 .idNotNull()
                 .isValid(comicRequest)
         ;
@@ -97,8 +90,8 @@ class ComicControllerIT {
                 "Japonês",
                 1,
                 1999,
-                List.of(1L, 2L),
-                123L,
+                authorsIds,
+                publisherId,
                 "Edição especial",
                 "http://books.google.com/books/content?id=THsEEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
                 true,
@@ -243,14 +236,11 @@ class ComicControllerIT {
     @Test
     @DisplayName("Should return book when id exists")
     public void findBookWhenIdExists() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/comic/6", String.class);
+        ResponseEntity<ComicResponse> response = testRestTemplate.getForEntity("/catalog/comic/6", ComicResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        Comic comic = documentContext.read("$.data", Comic.class);
-
-        CatalogAssert.assertThat(comic)
+        CatalogAssert.assertThat(response.getBody())
                 .idNotNull()
                 .idIsPositive()
                 .hasTitle("Batman")
@@ -264,23 +254,23 @@ class ComicControllerIT {
     @DisplayName("Should return book when id does not exist")
     public void findBookWhenIdDoesNotExists() {
         ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/comic/100", String.class);
-        System.err.println(response.getStatusCode());
-        System.err.println(response.getBody());
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DisplayName("Should return all books in the catalog")
     void getBooks() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("/catalog/comic/", String.class);
+        ResponseEntity<List<ComicResponse>> response = testRestTemplate.exchange(
+                "/catalog/comic/",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                });
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-
-        List<Manga> mangas = documentContext.read("$.data");
-
-        assertThat(mangas).isNotEmpty();
+        assertThat(response.getBody()).isNotEmpty();
     }
 
     @Test
@@ -319,14 +309,14 @@ class ComicControllerIT {
         assertThat(response.getStatusCode()).isNotEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
-    private @NotNull HttpEntity getEntity() {
+    private @NotNull HttpEntity<?> getEntity() {
         HttpHeaders headers = this.getHttpHeaders();
-        return new HttpEntity(headers);
+        return new HttpEntity<>(headers);
     }
 
-    private @NotNull HttpEntity getEntity(ComicRequest request) {
+    private @NotNull HttpEntity<?> getEntity(ComicRequest request) {
         HttpHeaders headers = this.getHttpHeaders();
-        return new HttpEntity(request, headers);
+        return new HttpEntity<>(request, headers);
     }
 
     private @NotNull HttpHeaders getHttpHeaders() {
