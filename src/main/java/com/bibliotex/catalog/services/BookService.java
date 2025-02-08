@@ -9,6 +9,7 @@ import com.bibliotex.catalog.repositories.BookRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -20,14 +21,16 @@ public class BookService {
     private final AuthorService authorService;
     private final PublisherService publisherService;
     private final ValidatorService validatorService;
+    private final GenreService genreService;
 
     public BookResponse create(BookRequest bookRequest) {
         validatorService.isValidOrThrow(bookRequest);
 
         var authors = authorService.findById(bookRequest.authorsIds());
+        var genres = genreService.findById(bookRequest.genresIds());
         var publisher = publisherService.findById(bookRequest.publisherId());
 
-        Book book = bookMapper.toEntity(bookRequest, authors, publisher);
+        Book book = bookMapper.toEntity(bookRequest, authors, publisher, genres);
 
         book = bookRepository.save(book);
 
@@ -38,13 +41,35 @@ public class BookService {
         return bookRepository.findAll().stream().map(bookMapper::toDTO).toList();
     }
 
+    public Book findActive(Long id) {
+        return bookRepository.findByIdAndIsActiveTrue(id).orElseThrow(BookNotFoundException::new);
+    }
+
+    public Book find(Long id) {
+        return bookRepository.findById(id).orElseThrow(BookNotFoundException::new);
+    }
+
     public BookResponse findBy(Long id) {
-        Book book = bookRepository.findById(id).orElseThrow(BookNotFoundException::new);
+        Book book = this.findActive(id);
 
         return bookMapper.toDTO(book);
     }
 
     public void deleteById(Long id) {
-        bookRepository.deleteById(id);
+        Book book = this.find(id);
+
+        book.setIsActive(false);
+        book.setDeletedAt(LocalDateTime.now());
+
+        bookRepository.save(book);
+    }
+
+    public void restoreBy(Long id) {
+        Book book = this.find(id);
+
+        book.setIsActive(true);
+        book.setDeletedAt(null);
+
+        bookRepository.save(book);
     }
 }

@@ -20,16 +20,19 @@ public class MangaService {
     private final PublisherService publisherService;
     private final MangaMapper mangaMapper;
     private final ValidatorService validatorService;
+    private final GenreService genreService;
 
     public MangaResponse create(MangaRequest mangaRequest) {
         validatorService.isValidOrThrow(mangaRequest);
 
         var authors = authorService.findById(mangaRequest.authorsIds());
+        var genres = genreService.findById(mangaRequest.genresIds());
         var publisher = publisherService.findById(mangaRequest.publisherId());
+
         System.err.println("publisher: " + publisher);
         System.err.println("authors: " + authors);
 
-        Manga manga = mangaMapper.toEntity(mangaRequest, authors, publisher);
+        Manga manga = mangaMapper.toEntity(mangaRequest, authors, publisher, genres);
 
         System.err.println("manga: " + manga);
         System.err.println("publisher: " + manga.getPublisher());

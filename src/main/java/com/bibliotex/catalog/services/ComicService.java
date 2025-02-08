@@ -19,14 +19,16 @@ public class ComicService {
     private final ValidatorService validatorService;
     private final AuthorService authorService;
     private final PublisherService publisherService;
+    private final GenreService genreService;
 
     public ComicResponse create(ComicRequest comicRequest) {
         validatorService.isValidOrThrow(comicRequest);
 
         var authors = authorService.findById(comicRequest.authorsIds());
+        var genres = genreService.findById(comicRequest.genresIds());
         var publisher = publisherService.findById(comicRequest.publisherId());
 
-        Comic comic = comicMapper.toEntity(comicRequest, authors, publisher);
+        Comic comic = comicMapper.toEntity(comicRequest, authors, publisher, genres);
 
         comic = comicRepository.save(comic);
 
