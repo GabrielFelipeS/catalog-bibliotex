@@ -1,5 +1,8 @@
 package com.bibliotex.catalog.domain.model;
 
+import com.bibliotex.catalog.domain.enums.ContentRating;
+import com.bibliotex.catalog.domain.enums.PublicationStatus;
+import com.bibliotex.catalog.domain.model.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -43,6 +46,28 @@ public abstract class Catalog extends BaseEntity {
     @Column(nullable = false)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private Integer numReaders;
+
+    @Column(nullable = false)
+    private Boolean hasAdaptation;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PublicationStatus publicationStatus;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ContentRating classification;
+
+    @ManyToMany
+    @JoinTable(
+            name = "genre_catalog",
+            joinColumns = @JoinColumn(name = "catalog_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private List<Genre> genres;
+
     @ManyToMany
     @JoinTable(
             name = "catalog_authors",
@@ -55,7 +80,12 @@ public abstract class Catalog extends BaseEntity {
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
 
-    public Catalog(String title, String description, Integer pages, String language, Integer edition, Integer yearOfRelease, String imageUrl, List<Author> authors, Publisher publisher) {
+    @Column(nullable = false)
+    private Boolean isActive;
+
+    public Catalog(String title, String description, Integer pages,
+                   String language, Integer edition, Integer yearOfRelease,
+                   String imageUrl, List<Author> authors, Publisher publisher, Integer numReaders, Boolean hasAdaptation, PublicationStatus publicationStatus, ContentRating classification, List<Genre> genres, Boolean isActive) {
         this.title = title;
         this.description = description;
         this.pages = pages;
@@ -65,6 +95,12 @@ public abstract class Catalog extends BaseEntity {
         this.imageUrl = imageUrl;
         this.authors = authors;
         this.publisher = publisher;
+        this.numReaders = numReaders;
+        this.hasAdaptation = hasAdaptation;
+        this.publicationStatus = publicationStatus;
+        this.classification = classification;
+        this.genres = genres;
+        this.isActive = isActive;
     }
 
     @JsonIgnore
