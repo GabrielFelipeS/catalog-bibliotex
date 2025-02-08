@@ -1,7 +1,6 @@
 package com.bibliotex.catalog.controllers;
 
 import com.bibliotex.catalog.domain.dto.request.ComicRequest;
-import com.bibliotex.catalog.domain.dto.response.ApiResponse;
 import com.bibliotex.catalog.domain.dto.response.ComicResponse;
 import com.bibliotex.catalog.services.ComicService;
 import com.bibliotex.catalog.services.KafkaService;
@@ -22,7 +21,7 @@ public class ComicController {
     private final KafkaService kafkaService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> create(@RequestBody @Valid ComicRequest comicRequest, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<ComicResponse> create(@RequestBody @Valid ComicRequest comicRequest, UriComponentsBuilder uriBuilder) {
         ComicResponse comicResponse = comicService.create(comicRequest);
 
         kafkaService.sendMessageCreate(comicResponse);
@@ -31,21 +30,21 @@ public class ComicController {
                 .buildAndExpand(comicResponse.id())
                 .toUri();
 
-        return ResponseEntity.created(location).body(new ApiResponse("Quadrinho criado com sucesso!", comicResponse));
+        return ResponseEntity.created(location).body(comicResponse);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findAll() {
+    public ResponseEntity<List<ComicResponse>> findAll() {
         List<ComicResponse> comicResponse = comicService.findAll();
 
-        return ResponseEntity.ok(new ApiResponse("Quadrinhos encontrados com sucesso!", comicResponse));
+        return ResponseEntity.ok(comicResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<ComicResponse> findById(@PathVariable Long id) {
         ComicResponse comicResponse = comicService.findBy(id);
 
-        return ResponseEntity.ok(new ApiResponse("Quadrinho encontrado com sucesso!", comicResponse));
+        return ResponseEntity.ok(comicResponse);
     }
 
     @DeleteMapping("/{id}")

@@ -1,7 +1,6 @@
 package com.bibliotex.catalog.controllers;
 
 import com.bibliotex.catalog.domain.dto.request.BookRequest;
-import com.bibliotex.catalog.domain.dto.response.ApiResponse;
 import com.bibliotex.catalog.domain.dto.response.BookResponse;
 import com.bibliotex.catalog.services.BookService;
 import com.bibliotex.catalog.services.KafkaService;
@@ -22,7 +21,7 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> create(@RequestBody @Valid BookRequest bookRequest, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<BookResponse> create(@RequestBody @Valid BookRequest bookRequest, UriComponentsBuilder uriBuilder) {
         BookResponse bookResponse = bookService.create(bookRequest);
 
         kafkaService.sendMessageCreate(bookResponse);
@@ -31,21 +30,21 @@ public class BookController {
                 .buildAndExpand(bookResponse.id())
                 .toUri();
 
-        return ResponseEntity.created(location).body(new ApiResponse("Livro criado com sucesso!", bookResponse));
+        return ResponseEntity.created(location).body(bookResponse);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findAll() {
+    public ResponseEntity<List<BookResponse>> findAll() {
         List<BookResponse> booksResponses = bookService.findAll();
 
-        return ResponseEntity.ok(new ApiResponse("Livros encontrados com sucesso!", booksResponses));
+        return ResponseEntity.ok(booksResponses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<BookResponse> findById(@PathVariable Long id) {
         BookResponse bookResponse = bookService.findBy(id);
 
-        return ResponseEntity.ok(new ApiResponse("Livros encontrados com sucesso!", bookResponse));
+        return ResponseEntity.ok(bookResponse);
     }
 
     @DeleteMapping("/{id}")

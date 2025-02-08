@@ -1,7 +1,6 @@
 package com.bibliotex.catalog.controllers;
 
 import com.bibliotex.catalog.domain.dto.request.MangaRequest;
-import com.bibliotex.catalog.domain.dto.response.ApiResponse;
 import com.bibliotex.catalog.domain.dto.response.MangaResponse;
 import com.bibliotex.catalog.services.KafkaService;
 import com.bibliotex.catalog.services.MangaService;
@@ -22,30 +21,30 @@ public class MangaController {
     private final MangaService mangaService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> create(@RequestBody @Valid MangaRequest mangaRequest, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<MangaResponse> create(@RequestBody @Valid MangaRequest mangaRequest, UriComponentsBuilder uriBuilder) {
         MangaResponse mangaResponse = mangaService.create(mangaRequest);
-        System.err.println(mangaResponse);
+
         kafkaService.sendMessageCreate(mangaResponse);
 
         URI location = uriBuilder.path("/catalog/manga/{id}")
                 .buildAndExpand(mangaResponse.id())
                 .toUri();
 
-        return ResponseEntity.created(location).body(new ApiResponse("Manga criado com sucesso!", mangaResponse));
+        return ResponseEntity.created(location).body(mangaResponse);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findAll() {
+    public ResponseEntity<List<MangaResponse>> findAll() {
         List<MangaResponse> mangaResponse = mangaService.findAll();
 
-        return ResponseEntity.ok(new ApiResponse("Mangas encontrados com sucesso!", mangaResponse));
+        return ResponseEntity.ok(mangaResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<MangaResponse> findById(@PathVariable Long id) {
         MangaResponse mangaResponse = mangaService.findBy(id);
 
-        return ResponseEntity.ok(new ApiResponse("Manga encontrado com sucesso!", mangaResponse));
+        return ResponseEntity.ok(mangaResponse);
     }
 
     @DeleteMapping("/{id}")
